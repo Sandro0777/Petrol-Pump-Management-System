@@ -1,0 +1,84 @@
+<div class="container-fluid">
+    <form action="" id="stock-form">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{stock.id}}">
+        <div class="form-group mb-3">
+            <label for="date" class="control-label">Date Added</label>
+            <input type="date" id="date" name="date" value="{{stock.date|date:'Y-m-d'}}" required class="form-control form-control-sm rounded-0">
+        </div>
+        <div class="form-group mb-3">
+            <label for="petrol" class="control-label">Petrol Type</label>
+            <select name="petrol" id="petrol" class="form-select form-select-sm rounded-0" required="required">
+                {% if not stock.petrol %}
+                <option value="" disabled selected></option>
+                {% else %}
+                <option value="" disabled></option>
+                {% endif %}
+                {% for petrol in petrols %}
+                    {% if stock.petrol.id == petrol.id %}
+                    <option value="{{petrol.id}}" selected>{{petrol.name}}</option>
+                    {% else %}
+                    <option value="{{petrol.id}}">{{petrol.name}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="volume" class="control-label">Fuel Volume <small><em>(Liter)</em></small></label>
+            <input step="any" type="number" id="volume" name="volume" value="{{stock.volume}}" required class="form-control form-control-sm rounded-0 text-end">
+        </div>
+    </form>
+</div>
+<script>
+    $(function() {
+        $('#uni_modal').on('shown.bs.modal', function() {
+            $('#petrol').select2({
+                placeholder: "Please select here",
+                width: '100%',
+                dropdownParent: $('#uni_modal')
+            })
+        })
+        $('#stock-form').submit(function(e) {
+            e.preventDefault()
+            var _this = $(this)
+            var el = $('<div>')
+            el.addClass("alert alert-danger rounded-0 err-msg")
+            el.hide()
+            $('.err-msg').remove()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity()
+                return false
+            }
+            start_loader()
+            $.ajax({
+                url: "{% url 'save-stock' %}",
+                method: 'POST',
+                data: _this.serialize(),
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    el.text("An error occurred.")
+                    _this.prepend(el)
+                    el.show('slow')
+                    $('html, body, modal').scrollTop(0)
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        location.reload()
+                    } else if (!!resp.msg) {
+                        el.html(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    } else {
+                        el.html("An error occurred.")
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    }
+                    end_loader()
+                }
+            })
+        })
+    })
+</script>

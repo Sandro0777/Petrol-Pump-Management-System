@@ -1,0 +1,117 @@
+{% extends "base.html" %} {% load humanize %} {% load customfilter %} {% block pageContent %}
+
+<!--Section: Content-->
+<h3 class="fw-bolder">{{page_title}}</h3>
+<hr>
+<section class="py-3">
+    <div class="container">
+        <div class="card rounded-0 shadow-sm blur">
+            <div class="card-body">
+                <div class="container-fluid">
+                    <div class="text-end mb-2">
+                        <a href="javascript:void(0)" id="add_new" class="btn btn-primary btn-sm rounded-0 bg-gradient"><i class="fa fa-plus"></i> Add New Petrol Type</a>
+                    </div>
+                    <table class="table table-stripped table-bordered" id="petrol-table">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="15%">
+                            <col width="25%">
+                            <col width="30%">
+                            <col width="15%">
+                            <col width="10%">
+                        </colgroup>
+                        <thead>
+                            <tr class="bg-primary bg-gradient text-light">
+                                <th class="text-center">#</th>
+                                <th class="text-center">Date Added</th>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Price</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for petrol in petrols %}
+                            <tr>
+                                <td class="text-center">{{forloop.counter}}</td>
+                                <td class="">{{ petrol.date_created|date:"M d, Y H:i" }}</td>
+                                <td class="">{{petrol}}</td>
+                                <td class="text-end">₹ {{ petrol.price|floatformat:2|intcomma }}/L</td>
+                                <td class="text-center">
+                                    {% if petrol.status == '1' %}
+                                    <span class="badge bg-primary px-3 rounded-pill bg-gradient">Active</span> {% else %}
+                                    <span class="badge bg-default border text-dark px-3 rounded-pill bg-gradient">Inactive</span> {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light border bg-gradient btn-sm rounded-0 dropdown-toggle" type="button" id="petrolDD{{petrol.pk}}" data-bs-toggle="dropdown" aria-expanded="false">
+                                          Action
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="petrolDD{{petrol.pk}}">
+                                            <li><a class="dropdown-item view_detail" href="javascript:void(0)" data-url="{% url 'view-petrol-pk' petrol.pk %}">View Data</a></li>
+                                            <li><a class="dropdown-item edit-data" href="javascript:void(0)" data-url="{% url 'manage-petrol-pk' petrol.pk %}">Edit</a></li>
+                                            <li><a class="dropdown-item delete-data" href="javascript:void(0)" data-url="{% url 'delete-petrol-pk' petrol.pk %}">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div> {% endblock pageContent %} {% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#add_new').click(function() {
+            uni_modal("Add New Petrol Type", "{% url 'manage-petrol' %}")
+        })
+        $('table').find('td, th').addClass('align-middle px-2 py-1')
+        $('.view_detail').click(function() {
+            uni_modal("View Petrol Details", $(this).attr('data-url'), 'modal-md')
+        })
+        $('.edit-data').click(function() {
+            uni_modal("Edit Petrol Details", $(this).attr('data-url'))
+        })
+        $('.delete-data').click(function() {
+            _conf("Are you sure to delete this Petrol Type?", "delete_data", ["'" + $(this).attr('data-url') + "'"])
+        })
+        $('#petrol-table').dataTable({
+            columnDefs: [{
+                orderable: false,
+                targets: [5]
+            }]
+        })
+    })
+
+    function delete_data($url) {
+        start_loader()
+        $.ajax({
+            header: {
+                'X-CSRFToken': '{{csrf_token}}',
+            },
+            url: $url,
+            dataType: 'json',
+            error: err => {
+                console.error(err)
+                alert("An error occurred")
+                end_loader()
+            },
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    location.reload()
+                } else if (!!resp.msg) {
+                    alert(resp.msg)
+                } else {
+                    alert("An error occurred")
+                }
+                end_loader()
+            }
+        })
+
+    }
+</script>
+{% endblock ScriptBlock %}

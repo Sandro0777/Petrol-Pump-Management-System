@@ -1,0 +1,19 @@
+<style>
+    #uni_modal .modal-footer{
+        display: none;
+    }
+</style>
+<div class="container-fluid">
+    <dl>
+        <dt class="text-muted">Petrol Type</dt>
+        <dd class="ps-4">{{stock.petrol}}</dd>
+        <dt class="text-muted">Volume</dt>
+        <dd class="ps-4">{{stock.volume}} L</dd>
+        <dt class="text-muted">Stock-in Date</dt>
+        <dd class="ps-4">{{stock.date|date:"F d, Y"}}</dd>
+    </dl>
+    <div class="clear-fix mb-3"></div>
+    <div class="text-end">
+        <button class="btn btn-default border btn-sm rounded-0" type="button" data-bs-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+    </div>
+</div>

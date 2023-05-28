@@ -1,0 +1,25 @@
+<style>
+    #uni_modal .modal-footer{
+        display: none;
+    }
+</style>
+<div class="container-fluid">
+    <dl>
+        <dt class="text-muted">Petrol Type Name</dt>
+        <dd class="ps-4">{{petrol.name}}</dd>
+        <dt class="text-muted">Description</dt>
+        <dd class="ps-4">{{petrol.description}}</dd>
+        <dt class="text-muted">Price <small><em>per Liter</em></small></dt>
+        <dd class="ps-4">₹{{petrol.price}}</dd>
+        <dt class="text-muted">Status</dt>
+        <dd class="ps-4">
+            {% if petrol.status == '1' %}
+            <span class="badge bg-primary px-3 rounded-pill bg-gradient">Active</span> {% else %}
+            <span class="badge bg-default border text-dark px-3 rounded-pill bg-gradient">Inactive</span> {% endif %}
+        </dd>
+    </dl>
+    <div class="clear-fix mb-3"></div>
+    <div class="text-end">
+        <button class="btn btn-default border btn-sm rounded-0" type="button" data-bs-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+    </div>
+</div>

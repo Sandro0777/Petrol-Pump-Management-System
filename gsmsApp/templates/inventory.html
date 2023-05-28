@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% load humanize %} {% load customfilter %} {% block pageContent %}
+
+<!--Section: Content-->
+<h3 class="fw-bolder">{{page_title}}</h3>
+<hr>
+<section class="py-3">
+    <div class="container">
+        <div class="card rounded-0 shadow-sm blur">
+            <div class="card-body">
+                <div class="container-fluid">
+                    <table class="table table-stripped table-bordered" id="petrol-table">
+                        <colgroup>
+                            <col width="15%">
+                            <col width="50%">
+                            <col width="35%">
+                        </colgroup>
+                        <thead>
+                            <tr class="bg-primary bg-gradient text-light">
+                                <th class="text-center">#</th>
+                                <th class="text-center">Petrol</th>
+                                <th class="text-center">Available</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for petrol in petrols %}
+                            <tr>
+                                <td class="text-center">{{forloop.counter}}</td>
+                                <td class="">{{petrol}}</td>
+                                <td class="text-end">{{ petrol.available|floatformat:2|intcomma }} L</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div> {% endblock pageContent %} {% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#petrol-table').dataTable()
+    })
+</script>
+{% endblock ScriptBlock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %} {% load humanize %} {% load customfilter %} {% block pageContent %}
+
+<!--Section: Content-->
+<h3 class="fw-bolder">{{page_title}}</h3>
+<hr>
+<section class="py-3">
+    <div class="container">
+        <div class="card rounded-0 shadow-sm blur">
+            <div class="card-body">
+                <div class="container-fluid">
+                    <div class="text-end mb-2">
+                        <a href="javascript:void(0)" id="add_new" class="btn btn-primary btn-sm rounded-0 bg-gradient"><i class="fa fa-plus"></i> Add New Sale</a>
+                    </div>
+                    <table class="table table-stripped table-bordered" id="sale-table">
+                        <colgroup>
+                            <col width="5%">
+                            <col width="15%">
+                            <col width="20%">
+                            <col width="25%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="15%">
+                        </colgroup>
+                        <thead>
+                            <tr class="bg-primary bg-gradient text-light">
+                                <th class="text-center">#</th>
+                                <th class="text-center">Date and time</th>
+                                <th class="text-center">Customer</th>
+                                <th class="text-center">Petrol</th>
+                                <th class="text-center">Volume</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in sales %}
+                            <tr>
+                                <td class="text-center">{{forloop.counter}}</td>
+                                <td class="">{{ sale.date_created|date:"M d, Y H:i" }}</td>
+                                <td class="">{{sale.customer_name}}</td>
+                                <td class="">{{sale.petrol}}</td>
+                                <td class="text-end">{{ sale.volume|floatformat:2|intcomma }} L</td>
+                                <td class="text-end">₹ {{ sale.amount|floatformat:2|intcomma }}</td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light border bg-gradient btn-sm rounded-0 dropdown-toggle" type="button" id="saleDD{{sale.pk}}" data-bs-toggle="dropdown" aria-expanded="false">
+                                          Action
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="saleDD{{sale.pk}}">
+                                            <li><a class="dropdown-item view_detail" href="javascript:void(0)" data-url="{% url 'view-sale-pk' sale.pk %}">View Data</a></li>
+                                            <li><a class="dropdown-item edit-data" href="javascript:void(0)" data-url="{% url 'manage-sale-pk' sale.pk %}">Edit</a></li>
+                                            <li><a class="dropdown-item delete-data" href="javascript:void(0)" data-url="{% url 'delete-sale-pk' sale.pk %}">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div> {% endblock pageContent %} {% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#add_new').click(function() {
+            uni_modal("Add New Sale", "{% url 'manage-sale' %}")
+        })
+        $('table').find('td, th').addClass('align-middle px-2 py-1')
+        $('.view_detail').click(function() {
+            uni_modal("View Sale Details", $(this).attr('data-url'), 'modal-md')
+        })
+        $('.edit-data').click(function() {
+            uni_modal("Edit Sale Details", $(this).attr('data-url'))
+        })
+        $('.delete-data').click(function() {
+            _conf("Are you sure to delete this Sale Type?", "delete_data", ["'" + $(this).attr('data-url') + "'"])
+        })
+        $('#sale-table').dataTable({
+            columnDefs: [{
+                orderable: false,
+                targets: [4]
+            }]
+        })
+    })
+
+    function delete_data($url) {
+        start_loader()
+        $.ajax({
+            header: {
+                'X-CSRFToken': '{{csrf_token}}',
+            },
+            url: $url,
+            dataType: 'json',
+            error: err => {
+                console.error(err)
+                alert("An error occurred")
+                end_loader()
+            },
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    location.reload()
+                } else if (!!resp.msg) {
+                    alert(resp.msg)
+                } else {
+                    alert("An error occurred")
+                }
+                end_loader()
+            }
+        })
+
+    }
+</script>
+{% endblock ScriptBlock %}

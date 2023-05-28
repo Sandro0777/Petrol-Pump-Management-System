@@ -1,0 +1,80 @@
+<div class="container-fluid">
+    <form action="" id="petrol-form">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{petrol.id}}">
+        <div class="form-group mb-3">
+            <label for="name" class="control-label">Name</label>
+            <input type="text" id="name" name="name" value="{{petrol.name}}" required class="form-control form-control-sm rounded-0">
+        </div>
+        <div class="form-group mb-3">
+            <label for="description" class="control-label">Description</label>
+            <textarea rows="3" id="description" name="description" required class="form-control form-control-sm rounded-0">{{petrol.description}}</textarea>
+        </div>
+        <div class="form-group mb-3">
+            <label for="price" class="control-label">Price <small><em>per Liter</em></small></label>
+            <input step="any" type="number" id="price" name="price" value="{{petrol.price}}" required class="form-control form-control-sm rounded-0 text-end">
+        </div>
+        <div class="form-group mb-3">
+            <label for="status" class="control-label">Status</label>
+            <select name="status" id="status" class="form-select form-select-sm rounded-0" required>
+                {% if petrol.status == '1' %}
+                <option value="1" selected>Active</option>
+                {% else %}
+                <option value="1">Active</option>
+                {% endif %}
+                
+                {% if petrol.status == '0' %}
+                <option value="0" selected>Inactive</option>
+                {% else %}
+                <option value="0">Inactive</option>
+                {% endif %}
+            </select>
+        </div>
+    </form>
+</div>
+<script>
+    $(function() {
+        $('#petrol-form').submit(function(e) {
+            e.preventDefault()
+            var _this = $(this)
+            var el = $('<div>')
+            el.addClass("alert alert-danger rounded-0 err-msg")
+            el.hide()
+            $('.err-msg').remove()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity()
+                return false
+            }
+            start_loader()
+            $.ajax({
+                url: "{% url 'save-petrol' %}",
+                method: 'POST',
+                data: _this.serialize(),
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    el.text("An error occurred.")
+                    _this.prepend(el)
+                    el.show('slow')
+                    $('html, body, modal').scrollTop(0)
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        location.reload()
+                    } else if (!!resp.msg) {
+                        el.html(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    } else {
+                        el.html("An error occurred.")
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    }
+                    end_loader()
+                }
+            })
+        })
+    })
+</script>

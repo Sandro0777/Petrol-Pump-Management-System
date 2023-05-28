@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% load humanize %} {% load customfilter %} {% block pageContent %}
+
+<!--Section: Content-->
+<section class="">
+    <div class="row justify-content-start">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 p-2">
+            <div class=" card card-default rounded-0 shadow border border-gray">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="d-flex w-100 align-items-center">
+                            <div class="col-3">
+                                <i class="fs-1 text-primary fa fa-th-list"></i>
+                            </div>
+                            <div class="col-9">
+                                <h1 class="text-end">{{total_type|intcomma}}</h2>
+                                    <div class="text-end text-sm"><b>Total Petrol Type</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% for petrol in petrols %}
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 p-2">
+            <div class=" card card-default rounded-0 shadow border border-gray">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="d-flex w-100 align-items-center">
+                            <div class="col-3">
+                                <i class="fs-1 text-muted fa fa-gas-pump"></i>
+                            </div>
+                            <div class="col-9">
+                                <h1 class="text-end">{{petrol.available|intcomma}}</h2>
+                                    <div class="text-end text-sm"><b>Available {{petrol}} L</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 p-2">
+            <div class=" card card-default rounded-0 shadow border border-gray">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="d-flex w-100 align-items-center">
+                            <div class="col-3">
+                                <i class="fs-1 text-warning fa fa-coins"></i>
+                            </div>
+                            <div class="col-9">
+                                <h1 class="text-end">₹ {{total_sales|floatformat:2|intcomma}}</h2>
+                                    <div class="text-end text-sm"><b>Today's Sale</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div> {% endblock pageContent %} {% block ScriptBlock %}
+<script>
+</script>
+{% endblock ScriptBlock %}

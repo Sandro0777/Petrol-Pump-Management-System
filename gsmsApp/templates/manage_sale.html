@@ -1,0 +1,129 @@
+{% load humanize %}
+<div class="container-fluid">
+    <form action="" id="sale-form">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{sale.id}}">
+        <input type="hidden" name="price" value="{% if sale.price %}{{sale.price}}{% else %}0{% endif %}">
+        <div class="form-group mb-3">
+            <label for="date" class="control-label">Date Added</label>
+            <input type="date" id="date" name="date" value="{% if sale.date %}{{sale.date|date:'Y-m-d'}}{% else %}{% now 'Y-m-d' %}{% endif %}" required class="form-control form-control-sm rounded-0">
+        </div>
+        <div class="form-group mb-3">
+            <label for="customer_name" class="control-label">Customer</label>
+            <input type="text" id="customer_name" name="customer_name" value="{% if sale.customer_name %}{{sale.customer_name}}{% else %}Guest{% endif %}" required class="form-control form-control-sm rounded-0">
+        </div>
+        <div class="form-group mb-3">
+            <label for="petrol" class="control-label">Petrol Type</label>
+            <select name="petrol" id="petrol" class="form-select form-select-sm rounded-0" required="required">
+                {% if not sale.petrol %}
+                <option value="" disabled selected></option>
+                {% else %}
+                <option value="" disabled></option>
+                {% endif %}
+                {% for petrol in petrols %}
+                    {% if sale.petrol.id == petrol.id %}
+                    <option value="{{petrol.id}}" data-price="{{petrol.price}}" selected>{{petrol.name}}</option>
+                    {% else %}
+                    <option value="{{petrol.id}}" data-price="{{petrol.price}}">{{petrol.name}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="volume" class="control-label">Price: <span class="fs-bolder" id="price">{% if sale.price %}{{sale.price|floatformat:2|intcomma}}{% else %}0.00{% endif %}</span></label>
+        </div>
+        <div class="form-group mb-3">
+            <label for="volume" class="control-label">Fuel Volume <small><em>(Liter)</em></small></label>
+            <input step="any" min="0" type="number" id="volume" name="volume" value="{% if sale.volume %}{{sale.volume|floatformat:2|intcomma}}{% else %}0{% endif %}" required class="form-control form-control-sm rounded-0 text-end">
+        </div>
+        <div class="form-group mb-3">
+            <label for="volume" class="control-label">Amount</label>
+            <input step="any" type="number" id="amount" name="amount" value="{% if sale.amount %}{{sale.amount|floatformat:2|intcomma}}{% else %}0{% endif %}" required class="form-control form-control-sm rounded-0 text-end">
+        </div>
+    </form>
+</div>
+<script>
+    $(function() {
+        $('#uni_modal').on('shown.bs.modal', function() {
+            $('#petrol').select2({
+                placeholder: "Please select here",
+                width: '100%',
+                dropdownParent: $('#uni_modal')
+            })
+            $('#petrol').change(function() {
+                var id = $(this).val()
+                var price = $(this).find("option[value='" + id + "']").attr('data-price') || 0
+                $('[name="price"]').val(price)
+                $('#price').text(parseFloat(price).toLocaleString('en-US', {
+                    style: 'decimal',
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2
+                }))
+                if ($('#volume').val() > 0) {
+                    $('#volume').trigger('input')
+                } else if ($('#amount').val() > 0) {
+                    $('#amount').trigger('input')
+                }
+            })
+            $('#volume').on('change, input', function() {
+                var volume = $('#volume').val()
+                volume = volume > 0 ? volume : 0;
+                var price = $('[name="price"]').val()
+                price = price > 0 ? price : 0;
+                var amount = parseFloat(volume) * parseFloat(price)
+                $('[name="amount"]').val(parseFloat(amount).toFixed(2))
+            })
+            $('#amount').on('change, input', function() {
+                var amount = $('#amount').val()
+                amount = amount > 0 ? amount : 0;
+                var price = $('[name="price"]').val()
+                price = price > 0 ? price : 0;
+                var volume = parseFloat(amount) / parseFloat(price)
+                console.log(parseFloat(volume).toFixed(2))
+                $('[name="volume"]').val(parseFloat(volume).toFixed(2))
+            })
+        })
+        $('#sale-form').submit(function(e) {
+            e.preventDefault()
+            var _this = $(this)
+            var el = $('<div>')
+            el.addClass("alert alert-danger rounded-0 err-msg")
+            el.hide()
+            $('.err-msg').remove()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity()
+                return false
+            }
+            start_loader()
+            $.ajax({
+                url: "{% url 'save-sale' %}",
+                method: 'POST',
+                data: _this.serialize(),
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    el.text("An error occurred.")
+                    _this.prepend(el)
+                    el.show('slow')
+                    $('html, body, modal').scrollTop(0)
+                },
+                success: function(resp) {
+                    if (resp.status == 'success') {
+                        location.reload()
+                    } else if (!!resp.msg) {
+                        el.html(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    } else {
+                        el.html("An error occurred.")
+                        _this.prepend(el)
+                        el.show('slow')
+                        $('html, body, modal').scrollTop(0)
+                    }
+                    end_loader()
+                }
+            })
+        })
+    })
+</script>
